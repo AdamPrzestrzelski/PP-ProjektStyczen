@@ -13,7 +13,7 @@ typedef struct ListElement {
 //Glowne menu aplikacji, wybieramy co chcemy zrobic (dodac produkt, wyswietlic liste zakupow, zapisac lub wczytac ja)
 void Menu(Zakupy** ListaZakupow) {
     printf("Witaj w twojej liscie zakupow!\n");
-    printf("Wybierz opcje:\n1. Dodaj produkt.\n2. Wyswietl liste zakupow.\n3. Zapisz swoja liste zakupow.\n");
+    printf("Wybierz opcje:\n1. Dodaj produkt.\n2. Wyswietl liste zakupow.\n3. Zapisz swoja liste zakupow.\n4. Wczytaj liste zakupow\n");
     int wybor;
     while(1){
         scanf("%d", &wybor);
@@ -30,6 +30,10 @@ void Menu(Zakupy** ListaZakupow) {
             case 3:
                 system("cls");
                 Zapisz(*ListaZakupow);
+                break;
+            case 4:
+                system("cls");
+                Wczytaj(*ListaZakupow);
                 break;
             default:
                 printf("Wybierz odpowiednia opcje\n");
@@ -126,7 +130,7 @@ void ObliczReszte(double CenaWszystkiego){
     }
 }
 
-//Funkcja zapisuje liste do pliku
+//Funkcja zapisuje liste zakupow do pliku
 void Zapisz(Zakupy* ListaZakupow) {
     FILE *plik = fopen("zakupy.txt", "w");
     if (plik == NULL) {
@@ -136,12 +140,17 @@ void Zapisz(Zakupy* ListaZakupow) {
 
     Zakupy* temp = ListaZakupow;
     while (temp != NULL) {
-        fprintf(plik, "%s,%d,%d\n", temp->Produkt, temp->Ilosc, temp->Cena);
+        fprintf(plik, "%s,%d,%.2f\n", temp->Produkt, temp->Ilosc, temp->Cena);
         temp = temp->next;
     }
     fclose(plik);
     printf("Lista zakupow zostala zapisana do pliku.\n");
     PowrotDoMenu(ListaZakupow);
+}
+
+//Funkcja wczytuje liste zakupow z pliku
+void Wczytaj(Zakupy* ListaZakupow){
+
 }
 
 int main(int argc, char const *argv[]) {
