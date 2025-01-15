@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+  
+#include <locale.h>
+#include <string.h>
 
 typedef struct ListElement {
     int Ilosc;
@@ -9,6 +12,7 @@ typedef struct ListElement {
     char Produkt[100];
     struct ListElement* next;
 } Zakupy;
+
 
 //Glowne menu aplikacji, wybieramy co chcemy zrobic (dodac produkt, wyswietlic liste zakupow, zapisac lub wczytac ja)
 void Menu(Zakupy** ListaZakupow) {
@@ -18,6 +22,7 @@ void Menu(Zakupy** ListaZakupow) {
     while(1){
         scanf("%d", &wybor);
         while (getchar() != '\n');
+
         switch (wybor) {
             case 1:
                 system("cls");
@@ -33,7 +38,9 @@ void Menu(Zakupy** ListaZakupow) {
                 break;
             case 4:
                 system("cls");
+
                 Wczytaj((Zakupy**)ListaZakupow);
+
                 break;
             default:
                 printf("Wybierz odpowiednia opcje\n");
@@ -50,7 +57,9 @@ void PowrotDoMenu(Zakupy* ListaZakupow) {
     Menu(&ListaZakupow);
 }
 
+
 //Funkcja przyjmuje dane o produkcie i wywoluje funkcje ktora go dodaje do listy zakupow
+
 void Dodawanie(Zakupy** ListaZakupow) {
     printf("Jaki produkt chcesz dodac?\n");
     char produkt[100];
@@ -65,11 +74,12 @@ void Dodawanie(Zakupy** ListaZakupow) {
     scanf("%fl", &cena);
     cena = round(cena * 100) / 100;
 
+
     DodawanieProduktu(ListaZakupow, produkt, ile, cena);
     PowrotDoMenu(*ListaZakupow);
 }
 
-//funkcja przyjmuje informacje o produkcie i dodaje go do listy zakupow
+
 void DodawanieProduktu(Zakupy** ListaZakupow, const char* produkt, int ilosc, double cena) {
     Zakupy* nowyProdukt = (Zakupy*)malloc(sizeof(Zakupy));
     if (nowyProdukt == NULL) {
@@ -79,12 +89,14 @@ void DodawanieProduktu(Zakupy** ListaZakupow, const char* produkt, int ilosc, do
 
     strcpy(nowyProdukt->Produkt, produkt);
     nowyProdukt->Ilosc = ilosc;
+
     nowyProdukt->Cena = cena;
     nowyProdukt->next = NULL;
 
     if (*ListaZakupow == NULL) {
         *ListaZakupow = nowyProdukt;
     } else {
+
         Zakupy* AktualnyProdukt = *ListaZakupow;
         while (AktualnyProdukt->next != NULL) {
             AktualnyProdukt = AktualnyProdukt->next;
@@ -98,6 +110,7 @@ void DodawanieProduktu(Zakupy** ListaZakupow, const char* produkt, int ilosc, do
 void Wyswietl(Zakupy* ListaZakupow) {
     double calaCena;
     double CenaWszystkiego = 0;
+
     if (ListaZakupow == NULL) {
         printf("Lista zakupow jest pusta.\n");
         PowrotDoMenu(ListaZakupow);
@@ -132,6 +145,7 @@ void ObliczReszte(double CenaWszystkiego){
 }
 
 //Funkcja zapisuje liste zakupow do pliku
+
 void Zapisz(Zakupy* ListaZakupow) {
     FILE *plik = fopen("zakupy.txt", "w");
     if (plik == NULL) {
@@ -142,13 +156,13 @@ void Zapisz(Zakupy* ListaZakupow) {
     Zakupy* temp = ListaZakupow;
     while (temp != NULL) {
         fprintf(plik, "%s,%d,%.2f\n", temp->Produkt, temp->Ilosc, temp->Cena);
+
         temp = temp->next;
     }
     fclose(plik);
     printf("Lista zakupow zostala zapisana do pliku.\n");
     PowrotDoMenu(ListaZakupow);
 }
-
 //Funkcja wczytuje liste zakupow z pliku
 void Wczytaj(Zakupy** ListaZakupow) {
     Zakupy* temp;
@@ -157,6 +171,7 @@ void Wczytaj(Zakupy** ListaZakupow) {
         *ListaZakupow = (*ListaZakupow)->next;
         free(temp);
     }
+
 
     FILE* plik = fopen("zakupy.txt", "r");
     if (plik == NULL) {
@@ -205,7 +220,9 @@ void Wczytaj(Zakupy** ListaZakupow) {
     PowrotDoMenu(*ListaZakupow);
 }
 
+
 int main(int argc, char const *argv[]) {
     Zakupy* ListaZakupow = NULL;
+
     Menu(&ListaZakupow);
 }
