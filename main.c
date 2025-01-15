@@ -33,7 +33,7 @@ void Menu(Zakupy** ListaZakupow) {
                 break;
             case 4:
                 system("cls");
-                Wczytaj(*ListaZakupow);
+                Wczytaj((Zakupy**)ListaZakupow);
                 break;
             default:
                 printf("Wybierz odpowiednia opcje\n");
@@ -103,30 +103,31 @@ void Wyswietl(Zakupy* ListaZakupow) {
         PowrotDoMenu(ListaZakupow);
     }
 
-    Zakupy* temp = ListaZakupow;
-    while (temp != NULL) {
-        calaCena = temp->Cena * temp->Ilosc;
+    Zakupy* AktualnyProdukt = ListaZakupow;
+    while (AktualnyProdukt != NULL) {
+        calaCena = AktualnyProdukt->Cena * AktualnyProdukt->Ilosc;
         CenaWszystkiego += calaCena;
-        printf("Produkt: %s Ilosc: %d Cena za sztuke: %.2fzl Cena za wszystkie: %.2fzl\n", temp->Produkt, temp->Ilosc, temp->Cena, calaCena);
-        temp = temp->next;
+        printf("Produkt: %s     Ilosc: %d       Cena za sztuke: %.2fzl      Cena za wszystkie: %.2fzl\n", AktualnyProdukt->Produkt, AktualnyProdukt->Ilosc, AktualnyProdukt->Cena, calaCena);
+        AktualnyProdukt = AktualnyProdukt->next;
     }
 
+    printf("\nCena za cale zakupy: %.2fzl", CenaWszystkiego);
     ObliczReszte(CenaWszystkiego);
     PowrotDoMenu(ListaZakupow);
 }
 //Funkcja przyjmuje cene calej listy zakupow i oblicza reszte z kwoty podanej przez uzytkownika
 void ObliczReszte(double CenaWszystkiego){
-    printf("\nPodaj jakim budzetem dysponujesz, aby obliczyc reszte jaka Ci zostanie po zakupach:\n");
+    printf("\n\nPodaj jakim budzetem dysponujesz, aby obliczyc reszte jaka Ci zostanie po zakupach:\n");
     double budzet;
     scanf("%lf", &budzet);
     budzet = round(budzet * 100) / 100;
     double reszta;
     reszta = budzet - CenaWszystkiego;
     if(reszta < 0){
-        printf("Nie stac Cie na te zakupy :( Brakuje ci: %.2fzl", -reszta);
+        printf("Nie stac Cie na te zakupy :( Brakuje ci: %.2fzl\n", -reszta);
     }
     else{
-        printf("Reszta jaka zostanie Ci z zakupow: %.2fzl", reszta);
+        printf("Reszta jaka zostanie Ci z zakupow: %.2fzl\n", reszta);
     }
 }
 
@@ -149,8 +150,59 @@ void Zapisz(Zakupy* ListaZakupow) {
 }
 
 //Funkcja wczytuje liste zakupow z pliku
-void Wczytaj(Zakupy* ListaZakupow){
+void Wczytaj(Zakupy** ListaZakupow) {
+    Zakupy* temp;
+    while (*ListaZakupow != NULL) {
+        temp = *ListaZakupow;
+        *ListaZakupow = (*ListaZakupow)->next;
+        free(temp);
+    }
 
+    FILE* plik = fopen("zakupy.txt", "r");
+    if (plik == NULL) {
+        printf("Blad otwarcia pliku!\n");
+        PowrotDoMenu(*ListaZakupow);
+    }
+
+    char linia[200];
+    while (fgets(linia, sizeof(linia), plik)) {
+        linia[strcspn(linia, "\n")] = '\0';
+
+        char produkt[100];
+        int ilosc;
+        double cena;
+
+        if (sscanf(linia, "%99[^,],%d,%lf", produkt, &ilosc, &cena) != 3) {
+            printf("Blad w formacie pliku: %s\n", linia);
+            continue;
+        }
+
+        Zakupy* nowyProdukt = (Zakupy*)malloc(sizeof(Zakupy));
+        if (nowyProdukt == NULL) {
+            printf("Blad alokacji pamieci!\n");
+            fclose(plik);
+            PowrotDoMenu(*ListaZakupow);
+        }
+
+        strcpy(nowyProdukt->Produkt, produkt);
+        nowyProdukt->Ilosc = ilosc;
+        nowyProdukt->Cena = cena;
+        nowyProdukt->next = NULL;
+
+        if (*ListaZakupow == NULL) {
+            *ListaZakupow = nowyProdukt;
+        } else {
+            Zakupy* temp = *ListaZakupow;
+            while (temp->next != NULL) {
+                temp = temp->next;
+            }
+            temp->next = nowyProdukt;
+        }
+    }
+
+    fclose(plik);
+    printf("Lista zakupow zostala wczytana z pliku.\n");
+    PowrotDoMenu(*ListaZakupow);
 }
 
 int main(int argc, char const *argv[]) {
